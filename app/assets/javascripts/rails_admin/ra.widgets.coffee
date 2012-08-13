@@ -26,7 +26,10 @@ $(document).live 'rails_admin.dom_ready', ->
     # enumeration
 
     $('form [data-enumeration]').each ->
-      $(this).filteringSelect $(this).data('options')
+      if $(this).is('[multiple]')
+        $(this).filteringMultiselect $(this).data('options')
+      else
+        $(this).filteringSelect $(this).data('options')
 
     # fileupload
 
@@ -34,6 +37,21 @@ $(document).live 'rails_admin.dom_ready', ->
       input = this
       $(this).find(".delete input[type='checkbox']").live 'click', ->
         $(input).children('.toggle').toggle('slow')
+
+    # fileupload-preview
+
+    $('form [data-fileupload]').change ->
+      input = this
+      image_container = $("#" + input.id).parent().children("#preview")
+      ext = $("#" + input.id).val().split('.').pop().toLowerCase()
+      if input.files and input.files[0] and $.inArray(ext, ['gif','png','jpg','jpeg','bmp']) != -1
+        reader = new FileReader()
+        reader.onload = (e) ->
+          image_container.attr "src", e.target.result
+        reader.readAsDataURL input.files[0]
+        image_container.show()
+      else
+        image_container.hide()
 
     # filtering-multiselect
 
@@ -126,24 +144,62 @@ $(document).live 'rails_admin.dom_ready', ->
 
     # ckeditor
 
-    $('form [data-richtext=ckeditor]').not('.ckeditored').each ->
-      options = $(this).data('options')
-      window.CKEDITOR_BASEPATH = options['base_location']
+    goCkeditors = (array) =>
+      array.each (index, domEle) ->
+        options = $(this).data
+        if instance = window.CKEDITOR.instances[this.id]
+            instance.destroy(true)
+        window.CKEDITOR.replace(this, options['options'])
+        $(this).addClass('ckeditored')
+
+    array = $('form [data-richtext=ckeditor]').not('.ckeditored')
+    if array.length
+      @array = array
       if not window.CKEDITOR
-        $(window.document).append('<script src="' + options['jspath'] + '"><\/script>')
-      if instance = window.CKEDITOR.instances[this.id]
-        instance.destroy(true)
-      window.CKEDITOR.replace(this, options['options'])
-      $(this).addClass('ckeditored')
+        options = $(array[0]).data('options')
+        window.CKEDITOR_BASEPATH = options['base_location']
+        $.getScript options['jspath'], (script, textStatus, jqXHR) =>
+          goCkeditors(@array)
+      else
+        goCkeditors(@array)
 
     #codemirror
 
-    $('form [data-richtext=codemirror]').not('.codemirrored').each ->
-      options = $(this).data('options')
+    goCodeMirrors = (array) =>
+      array.each (index, domEle) ->
+        options = $(this).data('options')
+        textarea = this
+        $.getScript options['locations']['mode'], (script, textStatus, jqXHR) ->
+          $('head').append('<link href="' + options['locations']['theme'] + '" rel="stylesheet" media="all" type="text\/css">')
+          CodeMirror.fromTextArea(textarea,{mode:options['options']['mode'],theme:options['options']['theme']})
+          $(textarea).addClass('codemirrored')
+
+    array = $('form [data-richtext=codemirror]').not('.codemirrored')
+    if array.length
+      @array = array
       if not window.CodeMirror
-        $(window.document).append('<script src="' + options['jspath'] + '" type="text\/javascript"><\/script>')
-        $('head').append('<script src="' + options['locations']['mode'] + '" type="text\/javascript"><\/script>')
+        options = $(array[0]).data('options')
         $('head').append('<link href="' + options['csspath'] + '" rel="stylesheet" media="all" type="text\/css">')
-        $('head').append('<link href="' + options['locations']['theme'] + '" rel="stylesheet" media="all" type="text\/css">')
-      CodeMirror.fromTextArea(this,{mode:options['options']['mode'],theme:options['options']['theme']})
-      $(this).addClass('codemirrored')
+        $.getScript options['jspath'], (script, textStatus, jqXHR) =>
+          goCodeMirrors(@array)
+      else
+        goCodeMirrors(@array)
+
+    # bootstrap_wysihtml5
+
+    goBootstrapWysihtml5s = (array) =>
+      array.each ->
+        $(@).addClass('bootstrap-wysihtml5ed')
+        $(@).closest('.controls').addClass('well')
+        $(@).wysihtml5()
+
+    array = $('form [data-richtext=bootstrap-wysihtml5]').not('.bootstrap-wysihtml5ed')
+    if array.length
+      @array = array
+      if not window.wysihtml5
+        options = $(array[0]).data('options')
+        $('head').append('<link href="' + options['csspath'] + '" rel="stylesheet" media="all" type="text\/css">')
+        $.getScript options['jspath'], (script, textStatus, jqXHR) =>
+          goBootstrapWysihtml5s(@array)
+      else
+        goBootstrapWysihtml5s(@array)
