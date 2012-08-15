@@ -20,9 +20,6 @@
             '<option value="_discard">...</option>' +
             '<option value="true"' + (field_value == "true" ? 'selected="selected"' : '') + '>True</option>' +
             '<option value="false"' + (field_value == "false" ? 'selected="selected"' : '') + '>False</option>' +
-            '<option disabled="disabled">---------</option>' +
-            '<option ' + (field_value == "_present" ? 'selected="selected"' : '') + ' value="_present">Is present</option>' +
-            '<option ' + (field_value == "_blank"   ? 'selected="selected"' : '') + ' value="_blank"  >Is blank</option>' +
           '</select>';
           break;
         case 'date':
