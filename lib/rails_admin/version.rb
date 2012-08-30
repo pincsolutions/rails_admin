@@ -1,8 +1,8 @@
 module RailsAdmin
   class Version
-    MAJOR = 0 unless defined? MAJOR
-    MINOR = 0 unless defined? MINOR
-    PATCH = 5 unless defined? PATCH
+    MAJOR = 2012 unless defined? MAJOR
+    MINOR = 8 unless defined? MINOR
+    PATCH = 30 unless defined? PATCH
     PRE = nil unless defined? PRE
 
     class << self
