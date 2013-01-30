@@ -69,7 +69,8 @@
           dialog = this._getModal(),
           form = dialog.find("form"),
           saveButtonText = dialog.find(":submit[name=_save]").html(),
-          cancelButtonText = dialog.find(":submit[name=_continue]").html();
+          cancelButtonText = "Cancel"; // TODO: This is a hack to avoid a painful upgrade to the latest master, since QA won't do another regression run on AMS at this time.
+                                       // TODO: To fix this hack, revert to sferik master and fix any new issues in your application.
       dialog.find('.form-actions').remove();
 
       form.attr("data-remote", true);
